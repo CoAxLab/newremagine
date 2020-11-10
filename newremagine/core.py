@@ -27,6 +27,7 @@ def train(
     num_burn=1,
     lr=0.001,
     device="cpu",
+    perfect=True,
     recall_name="Recall",
     recall_kwargs=None,
     vae_name="VAE",
@@ -65,12 +66,21 @@ def train(
 
         # Make/get training data
         if option == "new":
+            # Get new data
             train_batch = [
                 train_dataset[i][0] for i in range(batch_idx, batch_idx + batch_size)
             ]
             train_batch = torch.stack(train_batch)
-            memory.encode(train_batch)
             batch_idx += batch_size
+            # ....
+            # If the memory is perfect we recall the training data later
+            # If the memory is imperfect we add the reconstructed data
+            if perfect:
+                memory.encode(train_batch)
+            else:
+                recon_batch, _, _ = model(train_batch)
+                memory.encode(recon_batch)
+
         elif option == "recall":
             train_batch = memory.sample(1)
         else:
