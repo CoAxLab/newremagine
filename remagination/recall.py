@@ -3,38 +3,39 @@
 __all__ = ['Recall', 'PriorityRecall']
 
 # Cell
+import random
 import sys
 import numpy as np
 
 # Cell
 class Recall(object):
-    def __init__(self, capacity):
-        self.capacity = capacity
+    def __init__(self, capacity=1e5):
+        self.capacity = int(capacity)
         self.memory = []
         self.position = 0
 
-    def encode(self, *args):
-        """Saves a memory tuple."""
+    def encode(self, x):
+        """Saves a memory x."""
         # Pad out
         if len(self.memory) < self.capacity:
             self.memory.append(None)
         # Remember
-        self.memory[self.position] = Transition(*args)
-        self.position = (self.position + 1) % self.capacity
+        self.memory[self.position] = x
+        self.position = int((self.position + 1) % self.capacity)
 
     def __call__(self, *args):
         self.encode(*args)
 
     def sample(self, n):
-        return random.sample(self.memory, n)
+        return random.sample(self.memory, n)[0]
 
     def __len__(self):
         return len(self.memory)
 
 # Cell
 class PriorityRecall(object):
-    def __init__(self, capacity):
-        self.capacity = capacity
+    def __init__(self, capacity=1e5):
+        self.capacity = int(capacity)
         self.memory = []
         self.priority = []
         self.probs = None
@@ -42,8 +43,8 @@ class PriorityRecall(object):
         # Prevents div by 0 problems
         self.eps = sys.float_info.min
 
-    def encode(self, weight, *args):
-        """Saves a weight and a memory tuple."""
+    def encode(self, weight, x):
+        """Saves a weight and a memory x."""
         # Sanity
         weight = float(weight)
         if np.isclose(weight, 0.0):
@@ -54,8 +55,8 @@ class PriorityRecall(object):
             self.priority.append(None)
         # Remember
         self.priority[self.position] = weight
-        self.memory[self.position] = Transition(*args)
-        self.position = (self.position + 1) % self.capacity
+        self.memory[self.position] = x
+        self.position = int((self.position + 1) % self.capacity)
 
     def __call__(self, weight, *args):
         self.encode(weight, *args)

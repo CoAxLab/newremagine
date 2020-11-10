@@ -2,14 +2,12 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"train_fashion": "exp.ipynb",
-         "test_fashion": "exp.ipynb",
+index = {"train": "vae.ipynb",
+         "test": "vae.ipynb",
          "Recall": "recall.ipynb",
          "PriorityRecall": "recall.ipynb",
          "VAE": "vae.ipynb",
-         "loss_function": "vae.ipynb",
-         "train": "vae.ipynb",
-         "test": "vae.ipynb"}
+         "loss_function": "vae.ipynb"}
 
 modules = ["core.py",
            "recall.py",

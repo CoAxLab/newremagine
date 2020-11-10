@@ -10,12 +10,12 @@ import torch
 import torch as th
 import torch.optim as optim
 import torch.nn.functional as F
-from torch.nn import Module
+from torch import nn
 
 from torch.utils.tensorboard import SummaryWriter
 
 # Cell
-class VAE(Module):
+class VAE(nn.Module):
     def __init__(self, input_dim=784, latent_dim=20):
         super(VAE, self).__init__()
         # Set dims
@@ -44,10 +44,11 @@ class VAE(Module):
 
     def sample(self, n, device=None):
         """Use noise to sample latent space."""
-        x = torch.randn(n, self.latent_dim)
-        x = x.to(device)
-        samples = self.decode(x)
-        return samples
+        with torch.no_grad():
+            x = torch.randn(n, self.latent_dim)
+            x = x.to(device)
+            samples = self.decode(x)
+            return samples
 
     def forward(self, x):
         """Get a reconstructed image"""
@@ -69,12 +70,12 @@ def loss_function(recon_x, x, mu, logvar, input_dim):
     return BCE + KLD
 
 # Cell
-def train(train_batch, model, optimizer, device):
+def train(train_batch, model, optimizer, device, input_dim):
     model.train()
     batch = train_batch.to(device)
     optimizer.zero_grad()
     recon_batch, mu, logvar = model(train_batch)
-    loss = loss_function(recon_batch, data, mu, logvar, input_dim)
+    loss = loss_function(recon_batch, train_batch, mu, logvar, input_dim)
     loss.backward()
     optimizer.step()
     return loss
