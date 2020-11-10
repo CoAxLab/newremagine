@@ -4,6 +4,8 @@ __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
 index = {"train": "vae.ipynb",
          "test": "vae.ipynb",
+         "plot_latent": "core.ipynb",
+         "plot_test": "core.ipynb",
          "Recall": "recall.ipynb",
          "PriorityRecall": "recall.ipynb",
          "VAE": "vae.ipynb",
