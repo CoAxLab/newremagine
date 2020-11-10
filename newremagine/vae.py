@@ -81,13 +81,13 @@ def train(train_batch, model, optimizer, device, input_dim):
     return loss
 
 # Cell
-def test(test_data, model, device):
+def test(test_data, model, device, input_dim):
     model.eval()
     test_loss = 0
     with torch.no_grad():
         for i, (data, _) in enumerate(test_data):
             data = data.to(device)
             recon_batch, mu, logvar = model(data)
-            test_loss += loss_function(recon_batch, data, mu, logvar).item()
+            test_loss += loss_function(recon_batch, data, mu, logvar, input_dim).item()
 
     return test_loss

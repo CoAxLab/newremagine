@@ -85,4 +85,4 @@ def train(
 
 # Cell
 def test(model, test_dataset, device="cpu"):
-    return vae.test(test_dataset, model, device)
+    return vae.test(test_dataset, model, device, model.input_dim)
