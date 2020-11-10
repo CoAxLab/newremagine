@@ -2,11 +2,11 @@
 SHELL := /bin/bash
 SRC = $(wildcard ./*.ipynb)
 
-all: remagination docs
+all: newremagine docs
 
-remagination: $(SRC)
+newremagine: $(SRC)
 	nbdev_build_lib
-	touch remagination
+	touch newremagine
 
 sync:
 	nbdev_update_lib
