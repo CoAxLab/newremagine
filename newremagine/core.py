@@ -18,7 +18,6 @@ from newremagine import vae
 from newremagine import recall
 
 # Cell
-# `newremagine`
 def train(
     fraction,
     train_dataset,
@@ -72,15 +71,16 @@ def train(
             ]
             train_batch = torch.stack(train_batch)
             batch_idx += batch_size
-            # ....
-            # If the memory is perfect we recall the training data later
-            # If the memory is imperfect we add the reconstructed data
+            # If the memory is perfect we recall the
+            # training data later but If the memory
+            # is imperfect we add the reconstructed data
+            # the the memory intead.
             if perfect:
                 memory.encode(train_batch)
             else:
-                recon_batch, _, _ = model(train_batch)
-                memory.encode(recon_batch)
-
+                with torch.no_grad():
+                    recon_batch, _, _ = model(train_batch)
+                    memory.encode(recon_batch)
         elif option == "recall":
             train_batch = memory.sample(1)
         else:
