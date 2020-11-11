@@ -2,7 +2,7 @@
 New experiences, replay and imagination, titrated, in training.
 
 # introduction
-In this library we are given  `num_episodes` to learn a model. Each episode can be spent in one of three ways:
+In this library we are given  `num_episodes` to learn a model. Each episode can be spent on one of threeoptions:
 1. Sample new data
 2. Replay past data
 3. Imagine new data
@@ -12,7 +12,7 @@ We have assume that:
 2. The test data is from the same distribution as the traning. 
 3. We want the model to perform well on unseen (test) data. 
 
-So, what is the best way to divide up our time? Answering this question is our goal.
+So, what is the best way to divide up our time? Should we only sample new data? Should replay past data often? Should we imagine-as-augmentation often? What is the best mix? Answering this last question is our goal here.
 
 # install
 ``` bash
