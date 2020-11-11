@@ -35,7 +35,7 @@ class VAE(nn.Module):
         self.fc4 = nn.Linear(400, self.input_dim)
 
     def encode(self, x):
-        """Encode a torch tensor (batch_size, inpiut_size)"""
+        """Encode a torch tensor (batch_size, input_size)"""
         h1 = F.relu(self.fc1(x))
         return self.fc21(h1), self.fc22(h1)
 
