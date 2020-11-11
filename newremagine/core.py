@@ -1,28 +1,28 @@
 __all__ = ['train', 'test', 'classify', 'plot_latent', 'plot_test']
 
-from torchvision.datasets import FashionMNIST
 import numpy as np
+import matplotlib.pyplot as plt
+from copy import deepcopy
 
 import torch
 import torch as th
 import torch.optim as optim
 import torch.nn.functional as F
-
+from torch import nn
 from torch.utils.tensorboard import SummaryWriter
+from torch.utils.data import random_split
+from torchvision.datasets import FashionMNIST
 
 from newremagine import vae
 from newremagine import replay
-
-import matplotlib.pyplot as plt
-from copy import deepcopy
 
 
 def train(
     fraction,
     train_dataset,
-    num_episodes=10,
+    num_episodes=100,
     batch_size=10,
-    num_burn=1,
+    num_burn=10,
     lr=0.001,
     device="cpu",
     perfect=True,
@@ -121,7 +121,7 @@ def train(
                     recon_batch, _, _ = model(train_batch)
                     memory.encode(recon_batch)
         elif option == "replay":
-            train_batch = memory.sample(1)
+            train_batch = memory.sample(1)[0]
         else:
             # Sampling from the VAE model is a kind of
             # imagination, or so we imagine in here
@@ -151,10 +151,21 @@ def test(model, test_dataset, device="cpu"):
 
 
 class _Linear(nn.Module):
-    pass
+    def __init__(self, input_dim=20, output_dim=10):
+        super(_Linear, self).__init__()
+        # Set dims
+        self.input_dim = int(input_dim)
+        self.output_dim = int(output_dim)
+        # Init layers
+        self.fc1 = nn.Linear(self.input_dim, self.output_dim)
+        self.logprob = nn.LogSoftmax(dim=1)
+
+    def forward(self, x):
+        """Classify c"""
+        return self.logprob(self.fc1(x))
 
 
-def classify(model, test_dataset, num_episodes=100, lr=0.001, num_hidden=100):
+def classify(model, test_dataset, num_episodes=100, lr=0.001, device="cpu"):
     """Use the frozen latent space in model as 
     the input for a linear classifier
     
@@ -164,7 +175,47 @@ def classify(model, test_dataset, num_episodes=100, lr=0.001, num_hidden=100):
         Final accuracy
     """
 
-    pass
+    # Split data in half
+    train, test = random_split(test_dataset, [num_episodes, num_episodes])
+
+    # Init the classifier
+    linear = _Linear(input_dim=20 * 2, )
+    optimizer = optim.SGD(linear.parameters(), lr=lr)
+
+    # ----
+    for data, labels in train:
+        # Get latent encode
+        with torch.no_grad():
+            data = data.to(device)
+            z_mu, z_var = model.encode(data)
+            data_z = torch.cat([z_mu, z_var])
+
+        # Use it to learn a linear model
+        probs = linear(data_z)
+        loss = F.nll_loss(probs, labels)
+        loss.backward()
+        optimizer.step()
+
+    # ----
+    # Test final accuracy
+    test_loss = 0
+    test_correct = 0
+    total = 0
+    for data, labels in test:
+        with torch.no_grad():
+            # Get latent encode
+            data = data.to(device)
+            z_mu, z_var = model.encode(data)
+            data_z = torch.cat([z_mu, z_var])
+
+            # Test it
+            probs = linear(data_z)
+            test_loss += F.nll_loss(probs, labels)
+            total += labels.size(0)
+            test_correct += (torch.argmax(probs) == labels).sum().item()
+
+    # ---
+    return test_loss, test_correct / total
 
 
 def plot_latent(model, n, img_size=28):

@@ -32,7 +32,8 @@ class Replay(object):
 
     def sample(self, n):
         """Randomly sample `n` memories"""
-        return np.random.choice(self.memory, size=n).tolist()
+        idx = np.random.randint(0, len(self.memory), size=n)
+        return [self.memory[i] for i in idx]
 
     def __len__(self):
         return len(self.memory)
