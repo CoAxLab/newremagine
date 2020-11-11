@@ -31,6 +31,45 @@ def train(
     vae_name="VAE",
     vae_kwargs=None,
 ):
+    """Given a fraction and dataset, train to self-supervised model
+    
+    Params
+    -----
+    fraction : 3-tuple
+        A set of three probability values, setting the probability of 
+        sampling new data, replaying old data, or imagining data and
+        trainong the data.
+    train_dataset : a torch dataset object
+        The data to train on
+    num_epsidoes : int
+        The fixed number of training trials
+    batch_size : int
+        The size of batches to use when traning the network
+    num_burn : int (> 0)
+        The number of episodes before the we try and replar or 
+        imagine data. Both these need a min number of experiences
+        before they could be useful. 
+    lr : float (> 0)
+        The learning rate of the network
+    device : str
+        The device to use for training. Either 'cpu` or 'cuda:0'.
+        See torch docs for more on this.
+    perfect : bool
+        If True, replay uses exact copies of the data. If False
+        replay uses reconstructed data from the network itself
+    replay_name : str
+        Any name of a classe found in the `newremainge.replay` module
+        can be used here.
+    replay_kwargs : dict
+        Keword arguments to be transparently passed the the Replay
+        memory 
+    replay_name : str
+        Any name of a classe found in the `newremainge.vae` module
+        can be used here.
+    replay_kwargs : dict
+        Keword arguments to be transparently passed the the VAE
+        network
+    """
 
     # -- Init memories
     if replay_kwargs is None:
@@ -96,26 +135,47 @@ def train(
 
 
 def test(model, test_dataset, device="cpu"):
-    """Test a model on a new dataset"""
-
+    """Test a pre-trained model on a new dataset.
+    
+    Params
+    -----
+    model : torch nn.Module instance
+        The model we want to test. 
+    test_dataset : a torch dataset object
+        The data to train on
+     device : str
+        The device to use for training. Either 'cpu` or 'cuda:0'.
+        See torch docs for more on this
+    """
     return vae.test(test_dataset, model, device, model.input_dim)
 
 
-def plot_latent(model, batch_size, img_size=28):
-    """Display samples from the latent space."""
+def plot_latent(model, n, img_size=28):
+    """Display a grid of samples from the latent space.
+
+    Params
+    -----
+    model : torch nn.Module instance
+        The model we want to test.
+    n : int
+        The size of the grid
+    img_size : int
+        The size of images in the orginal data (We assume they
+        are greyscale)
+    """
 
     # Make a display grid
-    figure = np.zeros((img_size * batch_size, img_size * batch_size))
+    figure = np.zeros((img_size * n, img_size * n))
 
     # MAke data
-    x = model.sample(batch_size**2)
-    x = x.flatten().numpy().reshape(batch_size**2, img_size, img_size)
-    imgs = [x[i, ::] for i in range(batch_size**2)]
+    x = model.sample(n**2)
+    x = x.flatten().numpy().reshape(n**2, img_size, img_size)
+    imgs = [x[i, ::] for i in range(n**2)]
 
     # !
     k = 0
-    for i in range(batch_size):
-        for j in range(batch_size):
+    for i in range(n):
+        for j in range(n):
             figure[i * img_size:(i + 1) * img_size,
                    j * img_size:(j + 1) * img_size] = imgs[k]
             k += 1
@@ -126,14 +186,27 @@ def plot_latent(model, batch_size, img_size=28):
     plt.show()
 
 
-def plot_test(test_dataset, model, batch_size, img_size=28):
-    """Display random samples from the test data."""
+def plot_test(test_dataset, model, n, img_size=28):
+    """Display a grid random samples from the test data.
+    
+    Params
+    -----
+    model : torch nn.Module instance
+        The model we want to test.
+    test_dataset : a torch dataset object
+        The data to train on
+    n : int
+        The size of the grid
+    img_size : int
+        The size of images in the orginal data (We assume they
+        are greyscale)
+    """
 
     # Make a display grid
-    figure = np.zeros((img_size * batch_size, img_size * batch_size))
+    figure = np.zeros((img_size * n, img_size * n))
 
     # Choose data
-    idx = np.random.randint(0, len(test_dataset), size=batch_size**2)
+    idx = np.random.randint(0, len(test_dataset), size=n**2)
 
     # !
     imgs = []
@@ -147,8 +220,8 @@ def plot_test(test_dataset, model, batch_size, img_size=28):
         imgs.append(deepcopy(img))
 
     k = 0
-    for i in range(batch_size):
-        for j in range(batch_size):
+    for i in range(n):
+        for j in range(n):
             figure[i * img_size:(i + 1) * img_size,
                    j * img_size:(j + 1) * img_size] = imgs[k]
             k += 1
