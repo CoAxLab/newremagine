@@ -21,7 +21,9 @@ pip install -e newremagine
 ```
 
 # dependencies
-TODO
+python >3.6
+torch > 1.5
+standard anaconda 
 
 # usage
 See `usage.ipynb`.
