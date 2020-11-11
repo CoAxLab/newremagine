@@ -36,6 +36,7 @@ class VAE(nn.Module):
 
     def encode(self, x):
         """Encode a torch tensor (batch_size, input_size)"""
+        x = x.view(-1, self.input_dim)
         h1 = F.relu(self.fc1(x))
         return self.fc21(h1), self.fc22(h1)
 
@@ -59,7 +60,7 @@ class VAE(nn.Module):
 
     def forward(self, x):
         """Get a reconstructed image"""
-        mu, logvar = self.encode(x.view(-1, self.input_dim))
+        mu, logvar = self.encode(x)
         z = self._reparameterize(mu, logvar)
         return self.decode(z), mu, logvar
 
