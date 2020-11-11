@@ -254,7 +254,7 @@ def plot_latent(model, n, img_size=28):
     plt.show()
 
 
-def plot_test(test_dataset, model, n, img_size=28):
+def plot_test(model, test_dataset, n, img_size=28):
     """Display a grid random samples from the test data.
     
     Params
