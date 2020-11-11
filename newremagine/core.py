@@ -182,11 +182,12 @@ def classify(model,
         Final accuracy
     """
 
+    # -- Init
     # Pick some random data, for num_episodes
     n = len(test_dataset)
     idx = np.random.randint(0, 5, size=num_episodes * 2)
     class_dataset = torch.utils.data.Subset(test_dataset, indices=idx)
-    
+
     # Split it in half
     train, test = random_split(class_dataset, [num_episodes, num_episodes])
     train = torch.utils.data.DataLoader(train, batch_size=batch_size)
@@ -197,7 +198,7 @@ def classify(model,
                      output_dim=len(test_dataset.classes))
     optimizer = optim.SGD(linear.parameters(), lr=lr)
 
-    # ----
+    # -- !
     for data, labels in train:
         # Get latent encode
         with torch.no_grad():
@@ -211,8 +212,7 @@ def classify(model,
         loss.backward()
         optimizer.step()
 
-    # ----
-    # Test final accuracy
+    # -- Test final accuracy
     test_loss = 0
     test_correct = 0
     total = 0
@@ -227,10 +227,11 @@ def classify(model,
             probs = linear(data_z)
             test_loss += F.nll_loss(probs, labels)
             total += labels.size(0)
-            test_correct += (torch.argmax(probs) == labels).sum().item()
+            predicted = torch.argmax(probs, axis=1)
+            test_correct += (predicted == labels).sum().item()
 
-    # ---
-    return test_loss, test_correct / total
+    # --
+    return linear, test_loss.item(), test_correct / total
 
 
 def plot_latent(model, n, img_size=28):
