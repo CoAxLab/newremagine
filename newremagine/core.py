@@ -1,4 +1,4 @@
-__all__ = ['train', 'test', 'plot_latent', 'plot_test']
+__all__ = ['train', 'test', 'classify', 'plot_latent', 'plot_test']
 
 from torchvision.datasets import FashionMNIST
 import numpy as np
@@ -148,6 +148,23 @@ def test(model, test_dataset, device="cpu"):
         See torch docs for more on this
     """
     return vae.test(test_dataset, model, device, model.input_dim)
+
+
+class _Linear(nn.Module):
+    pass
+
+
+def classify(model, test_dataset, num_episodes=100, lr=0.001, num_hidden=100):
+    """Use the frozen latent space in model as 
+    the input for a linear classifier
+    
+    Return
+    ------
+    accuracy ; float
+        Final accuracy
+    """
+
+    pass
 
 
 def plot_latent(model, n, img_size=28):
