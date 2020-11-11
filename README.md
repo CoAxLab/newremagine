@@ -12,7 +12,7 @@ We have assume that:
 2. The test data is from the same distribution as the traning. 
 3. We want the model to perform well on unseen (test) data. 
 
-So, what is the best way to divide up our time? Should we only sample new data? Should replay past data often? Should we imagine-as-augmentation often? What is the best mix? Answering this last question is our goal here.
+So, what is the best way to divide up our time? Should we only sample new data? Should replay past data often? Should we imagine-as-augmentation often? What is the best mix? Answering this last question is our goal.
 
 # install
 ``` bash
