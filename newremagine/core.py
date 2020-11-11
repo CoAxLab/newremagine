@@ -162,10 +162,17 @@ class _Linear(nn.Module):
 
     def forward(self, x):
         """Classify c"""
-        return self.logprob(self.fc1(x))
+        x = self.fc1(x.view(-1, self.input_dim))
+        return self.logprob(x)
 
 
-def classify(model, test_dataset, num_episodes=100, lr=0.001, device="cpu"):
+def classify(model,
+             test_dataset,
+             latent_dim=20,
+             num_episodes=100,
+             batch_size=8,
+             lr=0.001,
+             device="cpu"):
     """Use the frozen latent space in model as 
     the input for a linear classifier
     
@@ -175,11 +182,19 @@ def classify(model, test_dataset, num_episodes=100, lr=0.001, device="cpu"):
         Final accuracy
     """
 
-    # Split data in half
-    train, test = random_split(test_dataset, [num_episodes, num_episodes])
+    # Pick some random data, for num_episodes
+    n = len(test_dataset)
+    idx = np.random.randint(0, 5, size=num_episodes * 2)
+    class_dataset = torch.utils.data.Subset(test_dataset, indices=idx)
+    
+    # Split it in half
+    train, test = random_split(class_dataset, [num_episodes, num_episodes])
+    train = torch.utils.data.DataLoader(train, batch_size=batch_size)
+    test = torch.utils.data.DataLoader(test, batch_size=batch_size)
 
     # Init the classifier
-    linear = _Linear(input_dim=20 * 2, )
+    linear = _Linear(input_dim=latent_dim * 2,
+                     output_dim=len(test_dataset.classes))
     optimizer = optim.SGD(linear.parameters(), lr=lr)
 
     # ----
@@ -188,7 +203,7 @@ def classify(model, test_dataset, num_episodes=100, lr=0.001, device="cpu"):
         with torch.no_grad():
             data = data.to(device)
             z_mu, z_var = model.encode(data)
-            data_z = torch.cat([z_mu, z_var])
+            data_z = torch.cat([z_mu, z_var], axis=1)
 
         # Use it to learn a linear model
         probs = linear(data_z)
@@ -206,7 +221,7 @@ def classify(model, test_dataset, num_episodes=100, lr=0.001, device="cpu"):
             # Get latent encode
             data = data.to(device)
             z_mu, z_var = model.encode(data)
-            data_z = torch.cat([z_mu, z_var])
+            data_z = torch.cat([z_mu, z_var], axis=1)
 
             # Test it
             probs = linear(data_z)
