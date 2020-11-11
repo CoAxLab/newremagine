@@ -10,8 +10,10 @@ In this library we are given  `num_episodes` to learn a model. Each episode can 
 We have a finite amount of traning data. We assume the test data is from the same distribution as the traning. We want the model to perform well on unseen data. So, what is the best way to divide up our time? Answering this question is our goal.
 
 # install
-`git clone https://github.com/CoAxLab/newremagine`
-`pip install -e newremagine`
+``` bash
+git clone https://github.com/CoAxLab/newremagine
+pip install -e newremagine
+```
 
 # dependencies
 TODO
