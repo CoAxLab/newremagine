@@ -2,7 +2,7 @@
 New experiences, replay and imagination, titrated, in training.
 
 # introduction
-In this library we are given  `num_episodes` to learn a model. Each episode can be spent on one of threeoptions:
+In this library we are given  `num_episodes` to learn a model. Each episode can be spent on one of three options:
 1. Sample new data
 2. Replay past data
 3. Imagine new data
