@@ -173,11 +173,30 @@ def classify(model,
              batch_size=8,
              lr=0.001,
              device="cpu"):
-    """Use the frozen latent space in model as 
-    the input for a linear classifier
+    """Use a latent space to learn a linear classifier
     
+    Param
+    -----
+    model : torch nn.Module instance
+        The model we want to test. 
+    test_dataset : a torch dataset object
+        The data to train on
+    latent_dim : int
+        The dim of the latent memory in model
+    num_epsidoes : int
+        The fixed number of training trials
+    batch_size : int
+        Training batch size
+    lr : float >0
+        Learning rate
+     device : str
+        The device to use for training. Either 'cpu` or 'cuda:0'.
+        See torch docs for more on this
+
     Return
     ------
+    loss : float
+        Total loss on the test partition
     accuracy ; float
         Final accuracy
     """
