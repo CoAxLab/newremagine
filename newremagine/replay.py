@@ -6,13 +6,20 @@ import numpy as np
 
 
 class Replay(object):
+    """A finite capacity slot memory
+    
+    Params
+    -----
+    capacity : int
+        The size of the memry
+    """
     def __init__(self, capacity=1e5):
         self.capacity = int(capacity)
         self.memory = []
         self.position = 0
 
     def encode(self, x):
-        """Saves a memory x."""
+        """Saves a memory, x."""
         # Pad out
         if len(self.memory) < self.capacity:
             self.memory.append(None)
@@ -24,13 +31,21 @@ class Replay(object):
         self.encode(*args)
 
     def sample(self, n):
-        return random.sample(self.memory, n)[0]
+        """Randomly sample `n` memories"""
+        return np.random.choice(self.memory, size=n).tolist()
 
     def __len__(self):
         return len(self.memory)
 
 
 class PriorityReplay(object):
+    """A finite capacity slot memory, with priorities
+    
+    Params
+    -----
+    capacity : int
+        The size of the memry
+    """
     def __init__(self, capacity=1e5):
         self.capacity = int(capacity)
         self.memory = []
@@ -41,7 +56,7 @@ class PriorityReplay(object):
         self.eps = sys.float_info.min
 
     def encode(self, weight, x):
-        """Saves a weight and a memory x."""
+        """Saves a priority weight and a memory, x."""
         # Sanity
         weight = float(weight)
         if np.isclose(weight, 0.0):
@@ -61,6 +76,7 @@ class PriorityReplay(object):
         self.encode(weight, *args)
 
     def sample(self, n):
+        """A wieghted sample of n memories"""
         # Est probs from priority weights
         summed = sum(self.weight) + self.eps
         self.probs = [w / summed for w in self.priority]
