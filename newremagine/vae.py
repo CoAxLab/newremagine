@@ -1,4 +1,4 @@
-__all__ = ['VAE', 'loss_function', 'train', 'test']
+__all__ = ['VAE', '_loss_function', 'train', 'test']
 
 from torchvision.datasets import FashionMNIST
 import numpy as np
@@ -13,7 +13,15 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 class VAE(nn.Module):
-    """A VAE"""
+    """A classic VAE.
+
+    Params
+    ------
+    input_dim : int
+        The size of the (flattened) image vector 
+    latent_dim : int
+        The size of the latent memory    
+    """
     def __init__(self, input_dim=784, latent_dim=20):
         super(VAE, self).__init__()
         # Set dims
@@ -27,6 +35,7 @@ class VAE(nn.Module):
         self.fc4 = nn.Linear(400, self.input_dim)
 
     def encode(self, x):
+        """Encode a torch tensor (batch_size, inpiut_size)"""
         h1 = F.relu(self.fc1(x))
         return self.fc21(h1), self.fc22(h1)
 
@@ -36,12 +45,12 @@ class VAE(nn.Module):
         return mu + eps * std
 
     def decode(self, z):
-        """Expand a latent memory"""
+        """Expand a latent memory, to input_size."""
         h3 = F.relu(self.fc3(z))
         return torch.sigmoid(self.fc4(h3))
 
     def sample(self, n, device=None):
-        """Use noise to sample latent space."""
+        """Use noise to sample n images from latent space."""
         with torch.no_grad():
             x = torch.randn(n, self.latent_dim)
             x = x.to(device)
@@ -55,7 +64,7 @@ class VAE(nn.Module):
         return self.decode(z), mu, logvar
 
 
-def loss_function(recon_x, x, mu, logvar, input_dim):
+def _loss_function(recon_x, x, mu, logvar, input_dim):
     """Reconstruction + KL divergence losses summed over all elements and batch"""
     BCE = F.binary_cross_entropy(recon_x,
                                  x.view(-1, input_dim),
@@ -71,24 +80,28 @@ def loss_function(recon_x, x, mu, logvar, input_dim):
 
 
 def train(train_batch, model, optimizer, device, input_dim):
+    """A single VAE training step"""
+
     model.train()
     batch = train_batch.to(device)
     optimizer.zero_grad()
     recon_batch, mu, logvar = model(train_batch)
-    loss = loss_function(recon_batch, train_batch, mu, logvar, input_dim)
+    loss = _loss_function(recon_batch, train_batch, mu, logvar, input_dim)
     loss.backward()
     optimizer.step()
     return loss
 
 
 def test(test_data, model, device, input_dim):
+    """Test a VAE on a whole dataset"""
+
     model.eval()
     test_loss = 0
     with torch.no_grad():
         for i, (data, _) in enumerate(test_data):
             data = data.to(device)
             recon_batch, mu, logvar = model(data)
-            test_loss += loss_function(recon_batch, data, mu, logvar,
-                                       input_dim).item()
+            test_loss += _loss_function(recon_batch, data, mu, logvar,
+                                        input_dim).item()
 
     return test_loss
