@@ -122,10 +122,12 @@ def train(
                     memory.encode(recon_batch)
         elif option == "replay":
             train_batch = memory.sample(1)[0]
-        else:
+        elif option == "imagine":
             # Sampling from the VAE model is a kind of
             # imagination, or so we imagine in here
             train_batch = model.sample(batch_size, device=device)
+        else:
+            raise ValueError("Invalid learning option")
 
         # Train the vae/model
         loss = vae.train(train_batch, model, optimizer, device,
